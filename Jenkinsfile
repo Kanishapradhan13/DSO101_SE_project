@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         GITHUB_REPO = 'https://github.com/Kanishapradhan13/DSO101_SE_project.git'
-        GITHUB_CREDENTIALS = 'github credentials'
+        GITHUB_CREDENTIALS = '1'
     }
     
     triggers {
