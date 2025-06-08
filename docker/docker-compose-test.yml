@@ -1,0 +1,61 @@
+# File: docker/docker-compose-test.yml
+# Dedicated compose file for testing BMI Calculator
+
+version: '3.4'
+
+services:
+  test-database:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_admin
+      POSTGRES_PASSWORD: test_password
+    volumes:
+      - test-database-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_admin -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  bmi-tests:
+    build:
+      context: ../backend/
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    environment:
+      DATABASE_HOST: 'test-database'
+      DATABASE_NAME: 'test_db'
+      DATABASE_USER: 'test_admin'
+      DATABASE_PASSWORD: 'test_password'
+      DATABASE_PORT: '5432'
+      NODE_ENV: test
+    volumes:
+      - "../backend/src:/app/src"
+      - "../backend/database:/app/database"
+      - "test-results:/app/test-results"
+    depends_on:
+      test-database:
+        condition: service_healthy
+    command: |
+      sh -c "
+        echo 'Starting BMI Calculator Tests...' &&
+        echo 'Setting up test database...' &&
+        npx knex migrate:latest --knexfile database/knexfile.js &&
+        echo 'Running BMI unit tests...' &&
+        npm test -- --testPathPattern=bmi --coverage --coverageDirectory=test-results/coverage &&
+        echo 'All BMI tests completed successfully!' &&
+        echo 'Test results saved to test-results volume'
+      "
+
+volumes:
+  test-database-data:
+    driver: local
+  test-results:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/volumes/test-results

@@ -9,6 +9,7 @@ import { PRODUCTION, JWT_SECRET, REFRESH_JWT_SECRET } from './constants'
 import routes from './routes'
 import { databaseConfig } from './config'
 import HTTP_CODE from './errors/httpCodes'
+import bmiRoutes from './routes/bmiRoutes'
 
 // Environment execution info
 console.log(`Running in ${PRODUCTION ? 'PRODUCTION' : 'DEVELOPMENT'} mode\n`)
@@ -36,20 +37,29 @@ app.set('JWT_SECRET', JWT_SECRET)
 app.set('REFRESH_JWT_SECRET', REFRESH_JWT_SECRET)
 
 app.disable('x-powered-by')
+
+// MIDDLEWARE SETUP (Must come before routes)
 app.use(morgan('dev'))
 app.use(cors())
-app.use(express.json())
+app.use(express.json())  // This MUST come before routes that parse JSON
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 
 export const API_PREFIX = '/api'
 
+// ROUTES SETUP (After middleware)
 app.use(`${API_PREFIX}/public`, express.static('public'))
 app.use(`${API_PREFIX}/uploads`, express.static('uploads'))
+
+// BMI Routes
+app.use('/api/bmi', bmiRoutes)
+
+// Other API routes
 app.use(API_PREFIX, routes)
 
 // 404 Not Found Errors
-app.use(errorHandler((req: Request, res: Response, next: NextFunction) => {
+// eslint-disable-next-line no-unused-vars
+app.use(errorHandler((_req: Request, _res: Response, _next: NextFunction) => {
   throw new NotFoundError('Endpoint not Found')
 }))
 
@@ -60,7 +70,8 @@ interface ExpressError extends Error {
 }
 
 // 500 Internal Errors
-app.use((err: ExpressError, req: Request, res: Response, next: NextFunction) => {
+// eslint-disable-next-line no-unused-vars
+app.use((err: ExpressError, _req: Request, res: Response, _next: NextFunction) => {
   const isUnexpectedError = err.status === undefined
   console.log(err.message)
   console.log(err.stack)

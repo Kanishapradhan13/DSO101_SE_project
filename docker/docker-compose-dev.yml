@@ -1,4 +1,8 @@
+# File: docker/docker-compose-dev.yml
+# Updated version with BMI data persistence (compatible with existing setup)
+
 version: '3.4'
+
 services:
   database:
     image: postgres:12-alpine
@@ -7,43 +11,52 @@ services:
       POSTGRES_DB: db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: psswd
-      # PGDATA: /data/postgres
     volumes:
-      # Where our data will be persisted
-      - database-data:/data/postgres
+      # Use named volume for database persistence (BMI data will be saved here)
+      - database-data:/var/lib/postgresql/data
     ports:
-      # <Port exposed> : <Port running inside container>
       - "2345:5432"
     expose:
-      # Opens port 2345 on the container
       - '2345'
+    # Add health check for better dependency management
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   backend:
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     restart: unless-stopped
     build:
       context: ../backend/
       dockerfile: Dockerfile.dev
     working_dir: /app
     environment:
-      # Depends on 'database' docker service configuration
-      DATABASE_HOST: 'database' # Docker service called 'database'
+      # Database configuration
+      DATABASE_HOST: 'database'
       DATABASE_NAME: 'db'
       DATABASE_USER: 'admin'
       DATABASE_PASSWORD: 'psswd'
       DATABASE_PORT: '5432'
+      # Application configuration
       NODE_ENV: development
       JWT_SECRET: 87e3459aec28ec448228d4f990e80f14657daefc7f01a7146e1149663b30719d
       REFRESH_JWT_SECRET: 6c2723ab022250723988e5cf38e90908be10e82ee2ce802747d279f4dd7bc823
     volumes:
-        - "../backend/node_modules:/app/node_modules_for_local_development"
-        - "../backend/sync-package-lock:/app/sync-package-lock"
-        - "../backend/src:/app/src"
-        - "../backend/public:/app/public"
-        - "backend-uploads:/app/uploads"
+      # Your existing development volumes
+      - "../backend/node_modules:/app/node_modules_for_local_development"
+      - "../backend/sync-package-lock:/app/sync-package-lock"
+      - "../backend/src:/app/src"
+      - "../backend/public:/app/public"
+      # Volume for file uploads and BMI-related files
+      - "backend-uploads:/app/uploads"
     ports:
       - "3000:3000"
     command: "npm run develop"
+
   frontend:
     depends_on:
       - backend
@@ -54,13 +67,57 @@ services:
     working_dir: /app
     environment:
       NODE_ENV: development
+      # Add API URL for BMI service
+      REACT_APP_API_URL: http://localhost:3000
     volumes:
-        - "../frontend/node_modules:/app/node_modules_for_local_development"
-        - "../frontend/sync-package-lock:/app/sync-package-lock"
-        - "../frontend/src:/app/src"
+      # Your existing development volumes
+      - "../frontend/node_modules:/app/node_modules_for_local_development"
+      - "../frontend/sync-package-lock:/app/sync-package-lock"
+      - "../frontend/src:/app/src"
     ports:
       - "3010:3010"
     command: "npm run develop"
+
+  # New service for running BMI tests
+  test-runner:
+    build:
+      context: ../backend/
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    environment:
+      # Test database configuration
+      DATABASE_HOST: 'database'
+      DATABASE_NAME: 'db'
+      DATABASE_USER: 'admin'
+      DATABASE_PASSWORD: 'psswd'
+      DATABASE_PORT: '5432'
+      NODE_ENV: test
+      JWT_SECRET: test-jwt-secret
+      REFRESH_JWT_SECRET: test-refresh-jwt-secret
+    volumes:
+      - "../backend/node_modules:/app/node_modules_for_local_development"
+      - "../backend/sync-package-lock:/app/sync-package-lock"
+      - "../backend/src:/app/src"
+      - "../backend/database:/app/database"
+    depends_on:
+      database:
+        condition: service_healthy
+    profiles:
+      - testing
+    command: |
+      sh -c "
+        echo 'Starting BMI Calculator Tests...' &&
+        echo 'Waiting for database to be ready...' &&
+        sleep 5 &&
+        echo 'Running database migrations...' &&
+        npx knex migrate:latest --knexfile database/knexfile.js &&
+        echo 'Running BMI Calculator tests...' &&
+        npm test -- --testPathPattern=bmi --verbose &&
+        echo 'BMI tests completed successfully!'
+      "
+
 volumes:
+  # Named volume for database data persistence (includes BMI data)
   database-data:
+  # Named volume for backend uploads
   backend-uploads:

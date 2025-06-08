@@ -1,3 +1,4 @@
+// File: backend/database/knexfile.js
 
 const databaseConfig = {
   client: 'pg',
@@ -11,17 +12,29 @@ const databaseConfig = {
   }
 }
 
-const config = {
-  database: {
+// Knex expects this structure with environment names at the top level
+module.exports = {
+  development: {
     ...databaseConfig,
     pool: {
       min: 2,
       max: 10
     },
     migrations: {
+      directory: './migrations',
       tableName: 'knex_migrations'
     }
   },
-}
 
-module.exports = config
+  production: {
+    ...databaseConfig,
+    pool: {
+      min: 2,
+      max: 10
+    },
+    migrations: {
+      directory: './migrations',
+      tableName: 'knex_migrations'
+    }
+  }
+}
