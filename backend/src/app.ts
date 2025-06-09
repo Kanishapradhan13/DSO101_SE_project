@@ -51,6 +51,32 @@ export const API_PREFIX = '/api'
 app.use(`${API_PREFIX}/public`, express.static('public'))
 app.use(`${API_PREFIX}/uploads`, express.static('uploads'))
 
+// Test routes
+app.get('/test-direct', (req: Request, res: Response) => {
+  res.json({
+    message: 'Direct route works!',
+    timestamp: new Date(),
+    path: req.path
+  })
+})
+
+app.get('/api/test', (req: Request, res: Response) => {
+  res.json({
+    message: 'API test route works!',
+    timestamp: new Date(),
+    path: req.path
+  })
+})
+
+// Health check route
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'OK',
+    message: 'Server is healthy',
+    timestamp: new Date()
+  })
+})
+
 // BMI Routes
 app.use('/api/bmi', bmiRoutes)
 
@@ -58,10 +84,22 @@ app.use('/api/bmi', bmiRoutes)
 app.use(API_PREFIX, routes)
 
 // 404 Not Found Errors
-// eslint-disable-next-line no-unused-vars
-app.use(errorHandler((_req: Request, _res: Response, _next: NextFunction) => {
-  throw new NotFoundError('Endpoint not Found')
-}))
+app.use('*', (req: Request, res: Response) => {
+  res.status(404).json({
+    message: 'Endpoint not Found',
+    path: req.originalUrl,
+    method: req.method,
+    availableRoutes: [
+      'GET /test-direct',
+      'GET /api/test',
+      'GET /health',
+      'GET /api/bmi',
+      'POST /api/bmi',
+      'GET /api/bmi/:user_id',
+      'GET /api/bmi/:user_id/latest'
+    ]
+  })
+})
 
 interface ExpressError extends Error {
   status?: number
@@ -70,7 +108,6 @@ interface ExpressError extends Error {
 }
 
 // 500 Internal Errors
-// eslint-disable-next-line no-unused-vars
 app.use((err: ExpressError, _req: Request, res: Response, _next: NextFunction) => {
   const isUnexpectedError = err.status === undefined
   console.log(err.message)
@@ -86,11 +123,12 @@ app.use((err: ExpressError, _req: Request, res: Response, _next: NextFunction) =
 
 export default app
 
-// Add this at the end of your app.ts file
+// Server startup
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
   console.log(`API available at: http://localhost:${PORT}/api`)
   console.log(`BMI endpoints at: http://localhost:${PORT}/api/bmi`)
+  console.log(`Health check at: http://localhost:${PORT}/health`)
 })
