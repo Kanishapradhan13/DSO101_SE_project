@@ -21,8 +21,7 @@ jobs:
       - name: Build and Push Frontend
         run: |
           echo "Building frontend Docker image..."
-          cd frontend
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-frontend:latest .
+          docker build -f ./frontend/Dockerfile.prod -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-frontend:latest ./frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-frontend:latest
           echo "Frontend image pushed successfully"
           
@@ -30,14 +29,19 @@ jobs:
         run: |
           echo "Building backend Docker image..."
           cd backend
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest .
+          docker build -f ./backend/Dockerfile.prod -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest
           echo "Backend image pushed successfully"
           
-      - name: Build and Push Database
+         # Optional: DB image if not using Render's managed DB
+      - name: Build and Push DB
         run: |
-          echo "Building database Docker image..."
-          cd docker
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-database:latest -f Dockerfile.db .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-database:latest
-          echo "Database image pushed successfully"
+            # Check for database Dockerfiles
+            if [ -f "./docker/Dockerfile.prod" ]; then
+            docker build -f ./database/Dockerfile.prod -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest ./docker
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest
+            elif [ -f "./docker/Dockerfile" ]; then
+            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest ./docker
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest
+            else
+            echo "No database Dockerfile found, skipping DB image build"      
