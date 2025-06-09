@@ -84,35 +84,6 @@ app.use('/bmi', bmiRoutes)  // This handles calls to /bmi directly
 // BMI Routes
 app.use('/api/bmi', bmiRoutes)
 
-// Add this route temporarily for database setup (add this after your middleware setup)
-app.get('/setup-database', async (req: Request, res: Response) => {
-  try {
-    // Drop table if it exists
-    await knexConnection.schema.dropTableIfExists('bmi_records')
-    // Create the table with correct structure
-    await knexConnection.schema.createTable('bmi_records', (table) => {
-      table.increments('id').primary()
-      table.string('user_id').notNullable()
-      table.decimal('height', 5, 2).notNullable()
-      table.decimal('weight', 5, 2).notNullable()
-      table.integer('age').notNullable()
-      table.decimal('bmi', 5, 2).notNullable()
-      table.string('category').notNullable()
-      table.timestamps(true, true)
-    })
-    res.json({
-      message: 'Database table created successfully!',
-      table: 'bmi_records',
-      timestamp: new Date()
-    })
-  } catch (error) {
-    console.error('Database setup error:', error)
-    res.status(500).json({
-      error: error.message,
-      details: 'Failed to create database table'
-    })
-  }
-})
 
 // Other API routes
 app.use(API_PREFIX, routes)
