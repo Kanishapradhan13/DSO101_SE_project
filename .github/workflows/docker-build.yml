@@ -1,0 +1,43 @@
+# File: .github/workflows/docker-build.yml
+# GitHub Actions Pipeline for Docker Builds - BMI Calculator
+
+name: Docker Build and Push
+on: push
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Build and Push Frontend
+        run: |
+          echo "Building frontend Docker image..."
+          cd frontend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-frontend:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-frontend:latest
+          echo "Frontend image pushed successfully"
+          
+      - name: Build and Push Backend
+        run: |
+          echo "Building backend Docker image..."
+          cd backend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest
+          echo "Backend image pushed successfully"
+          
+      - name: Build and Push Database
+        run: |
+          echo "Building database Docker image..."
+          cd docker
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-database:latest -f Dockerfile.db .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-database:latest
+          echo "Database image pushed successfully"
