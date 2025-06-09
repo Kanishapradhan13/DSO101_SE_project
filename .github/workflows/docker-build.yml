@@ -32,15 +32,11 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest
           echo "Backend image pushed successfully"
           
-         # Optional: DB image if not using Render's managed DB
-      - name: Build and Push DB
+     
+      - name: Build and Push Database
         run: |
-            # Check for database Dockerfiles
-            if [ -f "./docker/Dockerfile.prod" ]; then
-            docker build -f ./database/Dockerfile.prod -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest ./docker
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest
-            elif [ -f "./docker/Dockerfile" ]; then
-            docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest ./docker
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-db:latest
-            else
-            echo "No database Dockerfile found, skipping DB image build"      
+           echo "Building database Docker image..."
+           cd docker
+           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-database:latest -f Dockerfile.db .
+           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-database:latest
+           echo "Database image pushed successfully"
