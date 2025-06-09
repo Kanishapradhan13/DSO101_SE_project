@@ -58,7 +58,6 @@ app.use('/api/bmi', bmiRoutes)
 app.use(API_PREFIX, routes)
 
 // 404 Not Found Errors
-// eslint-disable-next-line no-unused-vars
 app.use(errorHandler((_req: Request, _res: Response, _next: NextFunction) => {
   throw new NotFoundError('Endpoint not Found')
 }))
@@ -70,7 +69,6 @@ interface ExpressError extends Error {
 }
 
 // 500 Internal Errors
-// eslint-disable-next-line no-unused-vars
 app.use((err: ExpressError, _req: Request, res: Response, _next: NextFunction) => {
   const isUnexpectedError = err.status === undefined
   console.log(err.message)
