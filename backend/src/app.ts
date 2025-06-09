@@ -77,6 +77,9 @@ app.get('/health', (req: Request, res: Response) => {
   })
 })
 
+app.use('/bmi', bmiRoutes)  // This handles calls to /bmi directly
+
+
 // BMI Routes
 app.use('/api/bmi', bmiRoutes)
 
