@@ -28,7 +28,6 @@ jobs:
       - name: Build and Push Backend
         run: |
           echo "Building backend Docker image..."
-          cd backend
           docker build -f ./backend/Dockerfile.prod -t ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/bmi-backend:latest
           echo "Backend image pushed successfully"
