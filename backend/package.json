@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "npm run build && node build/bin/www.js",
+    "start": "npm run build && node build/app.js",
     "build": "tsc",
     "develop": "nodemon",
-    "serve": "node build/bin/www.js",
+    "serve": "node build/app.js",
     "migrate:latest": "knex migrate:latest --env database",
     "eslint-fix": "eslint --fix src/**/*.ts*",
     "eslint-report": "eslint src/**/* > eslint-report.txt",
