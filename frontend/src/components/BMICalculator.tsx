@@ -49,7 +49,7 @@ const BMICalculator: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/bmi', {
+      const response = await fetch('https://bmi-backend-65dc.onrender.com/api/bmi', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -84,7 +84,7 @@ const BMICalculator: React.FC = () => {
     if (!userId) return;
 
     try {
-      const response = await fetch(`/api/bmi/${userId}`);
+      const response = await fetch(`https://bmi-backend-65dc.onrender.com/api/bmi${userId}`);
       if (response.ok) {
         const data = await response.json();
         setHistory(data);
