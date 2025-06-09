@@ -27,7 +27,10 @@ module.exports = {
   },
 
   production: {
-    ...databaseConfig,
+    client: 'pg',
+    version: '5.7',
+    connection: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
     pool: {
       min: 2,
       max: 10
