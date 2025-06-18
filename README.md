@@ -204,6 +204,8 @@ Deploy backend
 
 ![alt text](<images/Screenshot from 2025-06-10 02-24-00.png>)
 
+![alt text](images/api.png)
+
 ### Deploy Frontend React App
 
 Deploy from Docker Registry
@@ -219,6 +221,10 @@ Deploy Frontend
 ![alt text](<images/Screenshot from 2025-06-10 00-41-59.png>)
 
 ![alt text](<images/Screenshot from 2025-06-10 00-43-05.png>)
+
+BMI CALCULATED
+
+![alt text](image.png)
 
 
 ## Challenges Faced & Solutions
@@ -255,11 +261,6 @@ Problem: Backend API endpoints returned "Endpoint not Found"
 
 Solution: Fixed route registration in Express app.ts file
 
-### Challenge 5: BMI Calculation Internal Server Error
-
-Problem: Frontend could connect to backend but BMI calculation failed
-
-Solution: This was identified as a minor database schema issue (work in progress)
 
 ## Conclusion
 
