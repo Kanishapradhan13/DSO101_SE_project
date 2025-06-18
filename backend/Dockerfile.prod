@@ -33,3 +33,5 @@ ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
 # CMD is not executed when command is defined in docker compose
 CMD [ "npm", "run", "serve" ]
+
+
