@@ -222,6 +222,10 @@ Deploy Frontend
 
 ![alt text](<images/Screenshot from 2025-06-10 00-43-05.png>)
 
+connection with backend
+
+![alt text](images/frontendapi.png)
+
 BMI CALCULATED
 
 ![alt text](image.png)
