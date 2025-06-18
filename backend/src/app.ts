@@ -78,6 +78,22 @@ app.get('/health', (req: Request, res: Response) => {
   })
 })
 
+app.get('/api', (req: Request, res: Response) => {
+  res.json({
+    message: "Message from backend, everything is ok!",
+    env: process.env.NODE_ENV || 'development',
+    availableRoutes: [
+      'GET /api - This endpoint',
+      'GET /api/test - API test route',
+      'GET /api/bmi - BMI API info',
+      'POST /api/bmi - Create BMI record',
+      'GET /api/bmi/:user_id - Get user BMI records',
+      'GET /api/bmi/:user_id/latest - Get latest BMI record'
+    ],
+    timestamp: new Date()
+  })
+})
+
 app.use('/bmi', bmiRoutes)  // This handles calls to /bmi directly
 
 
