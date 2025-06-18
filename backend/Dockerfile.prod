@@ -7,7 +7,7 @@ ENV NODE_OPTIONS=--max_old_space_size=4096
 
 # Install dependencies with force to resolve conflicts
 COPY package.json ./
-COPY package-lock.json ./
+COPY sync-package-lock ./
 RUN npm ci --force || npm install --force
 
 # Copy source code
